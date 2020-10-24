@@ -1,0 +1,186 @@
+<!-- #build-sample -->
+<project>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>hello-akka-java</groupId>
+    <artifactId>akka-metrics</artifactId>
+    <version>1.0</version>
+
+    <properties>
+      <akka.version>2.6.8</akka.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>lightbend-commercial</id>
+            <name>Lightbend Commercial</name>
+            <url>https://repo.lightbend.com/pass/z5_Hk6iM1SAJgzjvgxlw9r4JmTOs7ub0W0yDEVpav8UFiXc1/commercial-releases</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-actor-typed_2.13</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-stream_2.13</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
+        </dependency>
+        <!-- Dependencies for Cinnamon -->
+        <!-- Cinnamon Prometheus -->
+<!--        <dependency>-->
+<!--            <groupId>com.lightbend.cinnamon</groupId>-->
+<!--            <artifactId>cinnamon-prometheus</artifactId>-->
+<!--            <version>2.14.4</version>-->
+<!--        </dependency>-->
+
+        <!-- Exporter HTTP Server -->
+<!--        <dependency>-->
+<!--            <groupId>com.lightbend.cinnamon</groupId>-->
+<!--            <artifactId>cinnamon-prometheus-httpserver</artifactId>-->
+<!--            <version>2.14.4</version>-->
+<!--        </dependency>-->
+
+        <dependency>
+            <groupId>com.lightbend.cinnamon</groupId>
+            <artifactId>cinnamon-akka_2.13</artifactId>
+            <version>2.14.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.lightbend.cinnamon</groupId>
+            <artifactId>cinnamon-akka-typed_2.13</artifactId>
+            <version>2.14.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.lightbend.cinnamon</groupId>
+            <artifactId>cinnamon-akka-persistence_2.13</artifactId>
+            <version>2.14.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.lightbend.cinnamon</groupId>
+            <artifactId>cinnamon-akka-stream_2.13</artifactId>
+            <version>2.14.4</version>
+        </dependency>
+        <!-- Use Akka HTTP instrumentation -->
+        <dependency>
+            <groupId>com.lightbend.cinnamon</groupId>
+            <artifactId>cinnamon-akka-http_2.13</artifactId>
+            <version>2.14.4</version>
+        </dependency>
+
+        <!-- Newrelic -->
+        <dependency>
+            <groupId>com.newrelic.agent.java</groupId>
+            <artifactId>newrelic-api</artifactId>
+            <version>5.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.lightbend.cinnamon</groupId>
+            <artifactId>cinnamon-chmetrics</artifactId>
+            <version>2.14.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.lightbend.cinnamon</groupId>
+            <artifactId>cinnamon-newrelic</artifactId>
+            <version>2.14.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-actor-testkit-typed_2.13</artifactId>
+            <version>${akka.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.scalatestplus</groupId>
+            <artifactId>junit-4-12_2.10</artifactId>
+            <version>3.1.0.0</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <profiles>
+        <profile>
+            <id>quickstart</id>
+            <properties>
+                <mainClass>y.w.quickstart.AkkaQuickstart</mainClass>
+            </properties>
+        </profile>
+        <profile>
+            <id>stream</id>
+            <properties>
+                <mainClass>y.w.stream.Akkassembly</mainClass>
+            </properties>
+        </profile>
+    </profiles>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <configuration>
+                    <executable>java</executable>
+                    <arguments>
+                        <argument>-classpath</argument>
+                        <classpath />
+                        <!-- Adding the Cinnamon Agent to JVM -->
+                        <argument>-javaagent:${project.build.directory}/dependency/cinnamon-agent.jar</argument>
+                        <!-- Adding the Newrelic Agent to JVM -->
+                        <argument>-javaagent:/Users/yangwang/development/akka-stream/src/main/resources/newrelic.jar</argument>
+                        <argument>${mainClass}</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+            <plugin>
+                <!-- Pliguin to pull the Cinnamon Agent -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.lightbend.cinnamon</groupId>
+                                    <artifactId>cinnamon-agent</artifactId>
+                                    <version>2.14.4</version>
+                                    <overWrite>true</overWrite>
+                                    <destFileName>cinnamon-agent.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
